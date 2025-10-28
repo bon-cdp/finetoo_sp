@@ -1,0 +1,24 @@
+# Interactive CLI
+# Claude Code-like conversational interface for engineering documents
+
+# TODO: Implement interactive CLI
+# cc_binary(
+#     name = "finetoo_cli",
+#     srcs = ["finetoo_cli.cc"],
+#     deps = [
+#         "//proto:graph_cc_proto",
+#         "//proto:operations_cc_proto",
+#         "//src/parser:dxf_text_parser",
+#         "//src/graph:graph_builder",
+#         "//src/operations:operation_executor",
+#         "//src/semantic:part_identifier",
+#         "//src/semantic:dimension_extractor",
+#         "//src/export:bom_generator",
+#         "//src/export:dxf_writer",
+#         "//src/analysis:block_analyzer",
+#         "@com_google_absl//absl/flags:flag",
+#         "@com_google_absl//absl/flags:parse",
+#         "@com_google_absl//absl/status",
+#         "@com_google_absl//absl/strings",
+#     ],
+# )

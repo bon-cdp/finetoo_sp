@@ -32,15 +32,117 @@ Finetoo is a production-grade C++ implementation demonstrating how **graph schem
 
 ---
 
+## Phase 1 Focus: Two Key User Journeys 🎯
+
+While Finetoo's architecture supports arbitrary document understanding tasks, we're prioritizing two high-value engineering workflows in an interactive, Claude Code-like experience:
+
+### Interactive Engineering Assistant
+
+```bash
+# Launch Finetoo interactive session
+finetoo
+```
+
+Once launched, you get a conversational AI assistant specifically trained for engineering document workflows:
+
+### 1. Bill of Materials (BOM) Generation
+
+**User Experience**:
+```
+You: Generate a BOM from the drawings in binder_test_no_refs/
+
+Finetoo: I'll analyze all 7 drawings in that directory. One moment...
+        ✓ Parsed 18066-G-300.dxf (477 blocks, 5,643 entities)
+        ✓ Parsed 18066-G-301.dxf (892 blocks, 11,234 entities)
+        ...
+
+        Found 247 unique parts across all drawings.
+
+        ⚠ Warning: 3 blocks have divergent content:
+          - Block *U282 has different content in G-300 vs G-301
+          - Block *U445 has different content in G-304 vs G-306
+
+        Would you like to see the full BOM or investigate the divergences first?
+
+You: Show me the divergences for *U282
+
+Finetoo: Block *U282 appears in 3 drawings with 2 different versions:
+
+        Version 1 (hash: a3f2c1...):
+          - 18066-G-300.dxf (4 instances)
+          - 18066-G-304.dxf (2 instances)
+
+        Version 2 (hash: b7e8d4...):
+          - 18066-G-301.dxf (8 instances)
+
+        Key differences:
+          - Dimension "3.5" changed to "3.75" (handle 3F2A)
+          - Arc radius 2.0 changed to 2.25 (handle 3F2B)
+
+        Which version should be canonical? (1/2/skip)
+```
+
+**Key Capabilities**:
+- Natural language queries about parts and drawings
+- Interactive divergence resolution
+- Full provenance tracking
+- Conversational refinement of results
+
+### 2. Inspection Checklist Drawings
+
+**User Experience**:
+```
+You: Create an inspection checklist from 18066-G-300.dxf with only critical dimensions
+
+Finetoo: Analyzing drawing for critical dimensions...
+        ✓ Found 94 dimension entities
+        ✓ Identified 12 critical dimensions (tolerance < 0.01")
+        ✓ Simplified geometry (removed 87% of lines)
+        ✓ Preserved dimension annotations
+
+        Generated: inspection_checklist_G-300.dxf
+
+        Preview of critical dimensions:
+          1. Bore diameter: 3.500" ±0.005" (handle 2A1)
+          2. Flange thickness: 0.750" ±0.010" (handle 2B3)
+          3. Bolt circle diameter: 8.000" ±0.020" (handle 2C5)
+          ...
+
+        Would you like to adjust the criticality threshold or modify the output?
+
+You: Also include all GD&T callouts
+
+Finetoo: Adding GD&T annotations... ✓
+        Found 4 geometric tolerances:
+          - Perpendicularity callout (handle 3D2)
+          - Position tolerance (handle 3D7)
+          - Flatness callout (handle 3E1)
+          - Concentricity (handle 3F4)
+
+        Updated: inspection_checklist_G-300.dxf
+```
+
+**Key Capabilities**:
+- Conversational dimension filtering
+- Interactive adjustment of criteria
+- Visual preview before output
+- Multi-format export (DXF, PDF, CSV)
+
+See [docs/USER_JOURNEYS.md](docs/USER_JOURNEYS.md) for detailed workflows and more examples.
+
+---
+
 ## Architecture
 
 ```
-Document (DXF/XLSX/DOCX/PDF)
+Document (DXF/STEP/STL - all text-based formats)
     ↓
 ┌─────────────────────────────────────────┐
-│  Parser (DXF Text Parser)               │
-│  - Extract entities, blocks, handles     │
-│  - No external dependencies              │
+│  Format-Specific Text Parsers           │
+│  - DXF: Group code/value pairs          │
+│  - STEP: EXPRESS entity instances        │
+│  - STL: ASCII triangle definitions       │
+│  - No external CAD libraries required    │
 └─────────────────────────────────────────┘
     ↓
 ┌─────────────────────────────────────────┐
@@ -78,6 +180,89 @@ Discovered Operations (NOT Hardcoded!)
     ↓
 Results with Full Provenance (Handles, References)
 ```
+
+---
+
+## Multi-Format Support: Text-Based Parsing Strategy
+
+A key architectural decision in Finetoo is treating all engineering formats as **text-based structured documents** that can be parsed without proprietary CAD libraries.
+
+### Supported Formats (All Text-Based)
+
+| Format | Type | Structure | Schema Operations |
+|--------|------|-----------|-------------------|
+| **DXF** (AutoCAD) | 2D Drawing | Group code/value pairs | ✅ Fully implemented |
+| **STEP** (ISO 10303) | 3D Model + Assembly | EXPRESS entity instances | 🚧 Planned (Week 4-6) |
+| **STL** (ASCII) | 3D Mesh | Triangle vertices + normals | 🔮 Future |
+
+### Why Text-Based Parsing?
+
+**Traditional CAD tools** require expensive proprietary libraries (Open CASCADE, ACIS, etc.) that:
+- Are difficult to deploy in cloud environments
+- Have licensing restrictions
+- Add unnecessary dependencies for schema extraction
+
+**Finetoo's approach**: Parse the text format directly, extract schema metadata, build property graph.
+
+### Format Details
+
+#### DXF (Drawing Exchange Format)
+```
+0        ← Group code
+SECTION
+2        ← Group code
+HEADER
+9        ← Group code
+$ACADVER
+1        ← Group code (value follows)
+AC1027   ← Value
+```
+
+**Schema Extraction**: Group codes define entity types, properties, and relationships. We map these to property graph nodes/edges.
+
+#### STEP (Standard for Exchange of Product Data)
+```
+#10=PRODUCT('Part-123','Assembly','',(#20));
+#20=PRODUCT_CONTEXT('',#2,'mechanical');
+```
+
+**Schema Extraction**: EXPRESS entities (#10, #20) become nodes. Entity references create edges. Rich semantic metadata (materials, tolerances, assembly structure) preserved in property graph.
+
+**Why STEP matters**: Unlike DXF (2D), STEP provides:
+- 3D assembly hierarchies (exploded BOMs!)
+- Material specifications
+- Manufacturing tolerances (GD&T)
+- PDM metadata (revision history, approval workflow)
+
+#### STL (Stereolithography)
+```
+solid part
+  facet normal 0 0 1
+    outer loop
+      vertex 0 0 0
+      vertex 1 0 0
+      vertex 0 1 0
+    endloop
+  endfacet
+endsolid
+```
+
+**Schema Extraction**: Triangular mesh → geometric properties (volume, surface area, bounding box). Limited semantic value but useful for geometry validation.
+
+### Unified Schema-Driven Approach
+
+All three formats follow the same pattern:
+1. **Text Parser** → Extract entities, properties, relationships
+2. **GraphBuilder** → Map to property graph with operational metadata
+3. **SchemaAnalyzer** → Discover available operations from metadata
+4. **Operations** → Generic primitives work across all formats
+
+**Example**: The "find all parts" operation works identically on:
+- DXF: `MATCH blocks WHERE type="INSERT"` (part instances)
+- STEP: `MATCH entities WHERE type="PRODUCT"` (assembly components)
+- STL: N/A (STL has no part semantics)
+
+This is the power of schema-driven operations: **write once, works on any format that can be schema-described.**
 
 ---
 
@@ -127,12 +312,17 @@ finetoo_sp/
 │   └── BUILD.bazel
 │
 ├── src/
-│   ├── parser/           # ✅ DXF Text Parser (IMPLEMENTED)
+│   ├── parser/           # ✅ Format Parsers (DXF IMPLEMENTED)
 │   │   ├── dxf_text_parser.h/cc
 │   │   │   - Parses DXF line-by-line (group code/value pairs)
 │   │   │   - Extracts entities, blocks, handles
-│   │   │   - Builds lookup maps
 │   │   │   - Successfully tested on 18066-G-300.dxf (477 blocks, 5,643 entities)
+│   │   ├── step_parser.h/cc      # 🔮 PLANNED (Week 4-6)
+│   │   │   - Parse STEP EXPRESS entities
+│   │   │   - Extract assembly structure, materials, tolerances
+│   │   ├── stl_parser.h/cc       # 🔮 FUTURE
+│   │   │   - Parse STL ASCII format
+│   │   │   - Extract triangle mesh geometry
 │   │   └── BUILD.bazel
 │   │
 │   ├── schema/           # ✅ Schema Analyzer (IMPLEMENTED)
@@ -140,43 +330,75 @@ finetoo_sp/
 │   │   │   - CreateDXFSchema() with operational metadata
 │   │   │   - FindUniqueProperties() → match operations
 │   │   │   - FindComparableProperties() → compare operations
-│   │   │   - FindIndexedProperties() → filter operations
-│   │   │   - FindAggregableProperties() → aggregate operations
 │   │   │   - 8 unit tests passing ✅
 │   │   └── BUILD.bazel
 │   │
-│   ├── graph/            # 🚧 Property Graph (SKELETON)
+│   ├── graph/            # 🚧 Property Graph (SKELETON → PRIORITY)
 │   │   ├── graph_builder.h/cc
-│   │   │   - Converts DXF → Property Graph
+│   │   │   - Converts DXF/STEP/STL → Property Graph
 │   │   │   - Arena allocation for memory efficiency
-│   │   │   - String interning
+│   │   │   - String interning for deduplication
+│   │   │   - **TODO: Implement entity/block conversion**
+│   │   │   - **TODO: Build INSERT→Block REFERENCES edges**
 │   │   └── BUILD.bazel
 │   │
-│   ├── operations/       # 🚧 Generic Operations (SKELETON)
+│   ├── operations/       # 🚧 Generic Operations (SKELETON → PRIORITY)
 │   │   ├── operation_executor.h/cc
 │   │   │   - 8 generic operation primitives:
 │   │   │     1. Match - Find by unique property
 │   │   │     2. Filter - Select by criteria
 │   │   │     3. Compare - Compare property values
-│   │   │     4. Traverse - Follow edges
-│   │   │     5. Aggregate - Compute aggregates
+│   │   │     4. Traverse - Follow edges (key for BOM!)
+│   │   │     5. Aggregate - Compute aggregates (quantities!)
 │   │   │     6. GroupBy - Group by property
 │   │   │     7. Project - Extract properties
 │   │   │     8. Join - Combine by relationship
+│   │   │   - **TODO: Implement all 8 primitives**
 │   │   └── BUILD.bazel
 │   │
-│   ├── analysis/         # 🚧 CAD Analysis (SKELETON)
+│   ├── semantic/         # 🆕 Semantic Understanding (NEW → PRIORITY)
+│   │   ├── part_identifier.h/cc
+│   │   │   - Identify blocks that represent parts vs annotations
+│   │   │   - Schema-driven classification (not hardcoded rules)
+│   │   │   - Extract part attributes from block metadata
+│   │   ├── dimension_extractor.h/cc
+│   │   │   - Extract critical dimensions from DIMENSION entities
+│   │   │   - Parse tolerance specifications
+│   │   │   - Identify GD&T callouts
+│   │   └── BUILD.bazel
+│   │
+│   ├── analysis/         # 🚧 CAD Analysis (SKELETON → PRIORITY)
 │   │   ├── block_analyzer.h/cc
 │   │   │   - Divergence detection (SHA-256 hashing)
-│   │   │   - Block comparison (dimensions, geometry)
+│   │   │   - Block content comparison (dimensions, geometry)
 │   │   │   - Cross-drawing analysis
+│   │   │   - **TODO: Implement SHA-256 hash computation**
+│   │   └── BUILD.bazel
+│   │
+│   ├── export/           # 🆕 Export Formats (NEW → PRIORITY)
+│   │   ├── bom_generator.h/cc
+│   │   │   - Generate BOM from property graph
+│   │   │   - Output JSON, CSV, Excel formats
+│   │   │   - Include full provenance and divergence warnings
+│   │   ├── dxf_writer.h/cc
+│   │   │   - Generate simplified DXF files
+│   │   │   - Preserve critical dimensions and annotations
+│   │   │   - Add inspection metadata (checkboxes, tables)
+│   │   └── BUILD.bazel
+│   │
+│   ├── cli/              # 🆕 Interactive CLI (NEW → PRIORITY)
+│   │   ├── finetoo_cli.cc
+│   │   │   - Main entry point: `finetoo` command
+│   │   │   - Conversational interface (like Claude Code)
+│   │   │   - Command history, auto-completion
+│   │   │   - Integration with LLM for natural language
 │   │   └── BUILD.bazel
 │   │
 │   ├── query/            # 🔮 Query Service (PLANNED)
 │   │   ├── query_service.h/cc
-│   │   │   - Natural language query interface
+│   │   │   - Natural language query processing
 │   │   │   - LLM integration (Vertex AI)
-│   │   │   - Operation plan execution
+│   │   │   - Operation plan generation and execution
 │   │   └── BUILD.bazel
 │   │
 │   └── cloud/            # 🔮 Google Cloud Integration (PLANNED)
@@ -184,14 +406,13 @@ finetoo_sp/
 │       │   - Gemini/Claude API client
 │       │   - Prompt generation with schema context
 │       ├── storage_client.h/cc
-│       │   - Cloud Storage wrapper
+│       │   - Cloud Storage wrapper for drawings
 │       └── BUILD.bazel
 │
 ├── tools/                # Command-line utilities
 │   ├── demo_schema_discovery  # ✅ Demonstrates operation discovery
 │   ├── parse_dxf              # ✅ Tests DXF parser on real drawings
-│   ├── analyze_cloop.cc       # 🚧 C-loop divergence analysis (TODO)
-│   └── block_standardizer.cc  # 🚧 Interactive standardization (TODO)
+│   └── finetoo                # 🆕 Interactive CLI (symlink to //src/cli:finetoo_cli)
 │
 ├── test/                 # Unit tests
 │   └── (Tests co-located with source)
@@ -334,31 +555,47 @@ BLOCKS Section:
 - [x] Demonstration tools
 - [x] Unit tests passing
 
-### Phase 2: Property Graph & Operations (Week 1)
-- [ ] GraphBuilder implementation with arena allocation
-- [ ] BlockAnalyzer with SHA-256 hashing
-- [ ] Parse all 7 C-loop drawings
-- [ ] Detect block divergence
-- [ ] 8 generic operation primitives
+### Phase 2: BOM Generation (Week 1-2) 🎯 **← CURRENT FOCUS**
+- [ ] GraphBuilder: DXF → Property Graph with INSERT→Block edges
+- [ ] PartIdentifier: Semantic block classification (parts vs annotations)
+- [ ] BlockAnalyzer: SHA-256 hashing for divergence detection
+- [ ] Operation primitives: MATCH, FILTER, TRAVERSE, AGGREGATE
+- [ ] BOMGenerator: JSON/CSV output with provenance
+- [ ] Interactive CLI: Basic conversational interface
+- [ ] Parse all 7 C-loop drawings and generate BOM
 
-### Phase 3: LLM Integration (Week 2)
+### Phase 3: Inspection Checklist Generation (Week 3-4)
+- [ ] DimensionExtractor: Parse DIMENSION entities
+- [ ] Critical dimension identification (tolerance-based)
+- [ ] Geometry simplification algorithms
+- [ ] DXFWriter: Generate simplified drawings
+- [ ] Operation primitives: PROJECT, GROUP_BY
+- [ ] Add inspection metadata (checkboxes, tables)
+- [ ] Interactive workflow for dimension selection
+
+### Phase 4: LLM Integration (Week 4-6)
 - [ ] Vertex AI client (Gemini/Claude)
 - [ ] Prompt generation with schema context
-- [ ] Operation plan parsing (JSON → proto)
+- [ ] Natural language query processing
+- [ ] Operation plan generation (LLM → proto)
+- [ ] Enhanced conversational interface
 - [ ] Query service with gRPC
 
-### Phase 4: C-Loop Standardization (Week 2-3)
-- [ ] Interactive CLI for user feedback
-- [ ] Block comparison with dimension/geometry analysis
-- [ ] Block standardization (DXF generation)
-- [ ] PDF binder generation with index
+### Phase 5: STEP File Support (Week 6-8)
+- [ ] Research STEP EXPRESS data model
+- [ ] STEP text parser (like DXF parser)
+- [ ] STEPSchema: Map EXPRESS to property graph
+- [ ] Assembly structure extraction (3D BOM!)
+- [ ] Material and tolerance extraction
+- [ ] Extend operations to work with STEP
 
-### Phase 5: Production Deployment (Week 4)
-- [ ] Cloud Run deployment
+### Phase 6: Production Deployment (Week 8-10)
+- [ ] Cloud Run deployment with auto-scaling
 - [ ] Neo4j integration for persistent graphs
-- [ ] Cloud Storage integration
+- [ ] Cloud Storage integration for drawings
 - [ ] Pub/Sub event handling
-- [ ] Monitoring and analytics
+- [ ] Monitoring, logging, and analytics
+- [ ] STL parser for geometry validation
 
 ---
 
@@ -459,9 +696,10 @@ MIT License - see LICENSE file for details
 
 ---
 
-**Status**: Foundation Complete ✅
-**Next Milestone**: Block Divergence Analysis on C-Loop Drawings
-**Timeline**: 2-3 weeks for full C-loop standardization workflow
+**Status**: Foundation Complete ✅ → Phase 2 (BOM Generation) In Progress 🚧
+**Current Focus**: Interactive CLI + BOM Generation User Journey
+**Next Milestone**: Working BOM generator with divergence detection
+**Timeline**: 2 weeks for BOM, 2 weeks for Inspection Checklists, 2 weeks for LLM integration
 
 
 

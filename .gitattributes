@@ -1,0 +1,23 @@
+# GitHub Linguist overrides for correct language detection
+
+# Exclude vendored dependencies and virtual environments
+venv/** linguist-vendored
+bazel-* linguist-vendored
+build_events.txt linguist-generated
+
+# Exclude test data files from language stats
+binder_test_no_refs/** linguist-documentation
+
+# Explicitly mark C++ files
+*.cc linguist-language=C++
+*.h linguist-language=C++
+
+# Mark proto files
+*.proto linguist-language=Protocol-Buffer
+
+# Mark Bazel files
+*.bazel linguist-language=Starlark
+WORKSPACE linguist-language=Starlark
+MODULE.bazel linguist-language=Starlark
+BUILD linguist-language=Starlark
+.bazelrc linguist-language=Starlark

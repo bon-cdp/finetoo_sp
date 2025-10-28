@@ -428,7 +428,7 @@ If you use Finetoo in your research, please cite:
 ```bibtex
 @software{finetoo2025,
   title = {Finetoo: Schema-Driven Tool Discovery for Structured Document Understanding},
-  author = {Bon CDP Team},
+  authors = {jiwa, s; stringer, l; virji, k; michael-stewart, k},
   year = {2025},
   url = {https://github.com/bon-cdp/finetoo_sp}
 }
@@ -455,11 +455,12 @@ MIT License - see LICENSE file for details
 ## Contact
 
 - **GitHub**: [@bon-cdp](https://github.com/bon-cdp)
-- **Project**: [finetoo_sp](https://github.com/bon-cdp/finetoo_sp)
+- **Email**: sj@sf-labs.co
 
 ---
 
 **Status**: Foundation Complete ✅
 **Next Milestone**: Block Divergence Analysis on C-Loop Drawings
 **Timeline**: 2-3 weeks for full C-loop standardization workflow
+
 

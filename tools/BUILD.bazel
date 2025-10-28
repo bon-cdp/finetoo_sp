@@ -1,0 +1,18 @@
+# Command-line tools for Finetoo
+
+cc_binary(
+    name = "demo_schema_discovery",
+    srcs = ["demo_schema_discovery.cc"],
+    deps = [
+        "//src/schema:schema_analyzer",
+        "@com_google_absl//absl/strings:str_format",
+    ],
+)
+
+cc_binary(
+    name = "parse_dxf",
+    srcs = ["parse_dxf.cc"],
+    deps = [
+        "//src/parser:dxf_text_parser",
+    ],
+)

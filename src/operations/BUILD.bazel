@@ -1,0 +1,28 @@
+# Generic Operation Primitives
+
+cc_library(
+    name = "operation_executor",
+    srcs = ["operation_executor.cc"],
+    hdrs = ["operation_executor.h"],
+    deps = [
+        "//proto:graph_cc_proto",
+        "//proto:operations_cc_proto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# TODO: Implement operation discovery
+# cc_library(
+#     name = "operation_discovery",
+#     srcs = ["operation_discovery.cc"],
+#     hdrs = ["operation_discovery.h"],
+#     deps = [
+#         "//proto:graph_cc_proto",
+#         "//proto:operations_cc_proto",
+#         "//src/schema:schema_analyzer",
+#         "@com_google_absl//absl/container:flat_hash_set",
+#     ],
+#     visibility = ["//visibility:public"],
+# )

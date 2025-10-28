@@ -1,0 +1,24 @@
+# Schema analysis and operation discovery
+
+cc_library(
+    name = "schema_analyzer",
+    srcs = ["schema_analyzer.cc"],
+    hdrs = ["schema_analyzer.h"],
+    deps = [
+        "//proto:graph_cc_proto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "schema_analyzer_test",
+    srcs = ["schema_analyzer_test.cc"],
+    deps = [
+        ":schema_analyzer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

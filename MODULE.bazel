@@ -1,0 +1,35 @@
+"""
+Finetoo - Schema-Driven Document Understanding Platform
+Google Cloud C++ Implementation
+"""
+
+module(
+    name = "finetoo",
+    version = "0.1.0",
+)
+
+# Bazel rules for C++
+bazel_dep(name = "rules_cc", version = "0.0.10")
+
+# Protocol Buffers
+bazel_dep(name = "protobuf", version = "29.3")
+bazel_dep(name = "rules_proto", version = "7.0.2")
+
+# Abseil C++ library (Google's C++ standard library extensions)
+bazel_dep(name = "abseil-cpp", version = "20240722.0", repo_name = "com_google_absl")
+
+# gRPC for service communication
+bazel_dep(name = "grpc", version = "1.69.0", repo_name = "com_github_grpc_grpc")
+
+# GoogleTest for unit testing
+bazel_dep(name = "googletest", version = "1.15.2", repo_name = "com_google_googletest")
+
+# Google Cloud C++ libraries
+# TODO: Add when available in BCR or use http_archive
+# bazel_dep(name = "google_cloud_cpp", version = "2.34.0")
+
+# JSON library for LLM response parsing
+bazel_dep(name = "nlohmann_json", version = "3.11.3", repo_name = "nlohmann_json")
+
+# TODO: Add libdxfrw via http_archive once we have the repository URL
+# For now, we'll need to build it from source or use a local repository

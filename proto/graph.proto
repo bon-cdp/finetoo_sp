@@ -1,0 +1,383 @@
+// Copyright 2025 Finetoo
+// Schema-Driven Document Understanding - Graph Structures v1
+
+syntax = "proto3";
+
+package finetoo.graph.v1;
+
+option cc_enable_arenas = true;  // Enable arena allocation for memory efficiency
+option java_package = "com.finetoo.graph.v1";
+option java_multiple_files = true;
+
+// PropertyMetadata describes a property and its operational capabilities.
+// This metadata drives operation discovery per the finetoo whitepaper.
+message PropertyMetadata {
+  // Property name (e.g., "handle", "layer", "x", "y")
+  string name = 1;
+
+  // Data type of the property
+  enum Type {
+    TYPE_UNSPECIFIED = 0;  // Required first value per protobuf best practices
+    STRING = 1;
+    INT64 = 2;
+    DOUBLE = 3;
+    BOOL = 4;
+    BYTES = 5;
+  }
+  Type type = 2;
+
+  // Operational capabilities (drive operation discovery)
+  bool unique = 3;       // If true, enables match operations (e.g., handle)
+  bool comparable = 4;   // If true, enables compare operations (e.g., x, y coordinates)
+  bool indexed = 5;      // If true, enables filter operations (e.g., layer, type)
+  bool aggregable = 6;   // If true, enables aggregate operations (e.g., sum, avg)
+
+  // Reserved for future expansion (never reuse these numbers)
+  reserved 7 to 15;
+  reserved "deprecated_field";
+}
+
+// Node represents an entity in the property graph
+// Examples: CAD entities (LINE, CIRCLE), Excel cells, Word paragraphs
+message Node {
+  // Unique identifier (handle in DXF, cell address in XLSX, etc.)
+  string id = 1;
+
+  // Node type (e.g., "Entity", "Block", "Layer", "Cell", "Paragraph")
+  string type = 2;
+
+  // Properties stored by type for efficient access and sparse storage
+  map<string, string> string_props = 3;
+  map<string, double> numeric_props = 4;
+  map<string, bool> bool_props = 5;
+  map<string, int64> int_props = 6;
+
+  // Optional: raw source data for full provenance
+  bytes raw_data = 7;
+
+  // Creation timestamp (milliseconds since epoch)
+  int64 created_timestamp_ms = 8;
+
+  reserved 9 to 20;
+}
+
+// Edge represents a relationship between nodes
+message Edge {
+  // Unique edge identifier
+  string id = 1;
+
+  // Edge type (e.g., "BELONGS_TO", "CONTAINS", "REFERENCES", "DEPENDS_ON")
+  string type = 2;
+
+  // Source and target node IDs
+  string source_node_id = 3;
+  string target_node_id = 4;
+
+  // Optional edge properties
+  map<string, string> properties = 5;
+
+  // Edge weight (for algorithms)
+  double weight = 6;
+
+  reserved 7 to 15;
+}
+
+// Schema defines the structure and capabilities of a property graph
+message Schema {
+  // Node type definition with operational metadata
+  message NodeType {
+    string name = 1;  // e.g., "Entity", "Block"
+    repeated PropertyMetadata properties = 2;
+
+    // Optional: constraints on this node type
+    repeated string unique_properties = 3;  // Properties that must be unique
+
+    reserved 4 to 10;
+  }
+
+  // Edge type definition
+  message EdgeType {
+    string name = 1;  // e.g., "BELONGS_TO"
+    string source_type = 2;  // Allowed source node type
+    string target_type = 3;  // Allowed target node type
+
+    repeated PropertyMetadata properties = 4;
+
+    reserved 5 to 10;
+  }
+
+  repeated NodeType node_types = 1;
+  repeated EdgeType edge_types = 2;
+
+  // Document format metadata
+  string source_format = 3;      // "DXF", "XLSX", "DOCX", etc.
+  string format_version = 4;     // e.g., "AC1009", "AC1027" for DXF
+  string schema_version = 5;     // Finetoo schema version (e.g., "1.0.0")
+
+  reserved 6 to 20;
+}
+
+// NodeCollection groups nodes of the same type for efficient storage
+message NodeCollection {
+  repeated Node nodes = 1;
+
+  // Statistics for this collection
+  int64 count = 2;
+
+  reserved 3 to 5;
+}
+
+// GraphStats provides summary statistics
+message GraphStats {
+  int64 node_count = 1;
+  int64 edge_count = 2;
+
+  map<string, int64> nodes_per_type = 3;
+  map<string, int64> edges_per_type = 4;
+
+  // Memory usage estimate (bytes)
+  int64 estimated_memory_bytes = 5;
+
+  reserved 6 to 15;
+}
+
+// PropertyGraph is the complete graph representation of a document
+message PropertyGraph {
+  // Schema with operational metadata
+  Schema schema = 1;
+
+  // Nodes organized by type for efficient querying
+  map<string, NodeCollection> nodes_by_type = 2;
+
+  // All edges
+  repeated Edge edges = 3;
+
+  // Document-level metadata
+  map<string, string> metadata = 4;
+
+  // Statistics
+  GraphStats stats = 5;
+
+  // Source document information
+  string source_file_path = 6;
+  string source_file_hash = 7;  // SHA-256 hash
+  int64 parse_timestamp_ms = 8;
+
+  reserved 9 to 25;
+}
+
+// BlockContent stores block definition content for divergence detection
+message BlockContent {
+  string block_name = 1;
+  string content_hash = 2;  // SHA-256 hash of block content
+
+  // Optional: full block data
+  bytes block_data = 3;
+
+  // Metadata
+  int64 entity_count = 4;
+  repeated string entity_types = 5;
+
+  reserved 6 to 10;
+}
+
+// BlockDivergenceReport tracks block content differences across drawings
+message BlockDivergenceReport {
+  message BlockVersion {
+    string drawing_id = 1;
+    string drawing_name = 2;
+    string content_hash = 3;
+    int64 entity_count = 4;
+  }
+
+  message DivergentBlock {
+    string block_name = 1;
+    repeated BlockVersion versions = 2;
+    bool is_divergent = 3;  // true if multiple unique hashes exist
+  }
+
+  repeated DivergentBlock blocks = 1;
+
+  // Summary statistics
+  int64 total_blocks = 2;
+  int64 divergent_blocks = 3;
+  int64 consistent_blocks = 4;
+
+  reserved 5 to 15;
+}
+
+// ============================================================================
+// CAD Geometry Entities (for detailed dimension and geometry comparison)
+// ============================================================================
+
+// Point represents a 3D point in space
+message Point {
+  double x = 1;  // comparable, aggregable
+  double y = 2;  // comparable, aggregable
+  double z = 3;  // comparable, aggregable (often 0 for 2D drawings)
+
+  reserved 4 to 10;
+}
+
+// DimensionEntity represents a dimension in a CAD drawing
+message DimensionEntity {
+  enum DimensionType {
+    DIMENSION_TYPE_UNSPECIFIED = 0;
+    LINEAR = 1;      // Linear dimension
+    ANGULAR = 2;     // Angular dimension
+    RADIAL = 3;      // Radius dimension
+    DIAMETRIC = 4;   // Diameter dimension
+    ORDINATE = 5;    // Ordinate dimension
+  }
+  DimensionType dim_type = 1;
+
+  // Actual measured value (comparable! key for detecting changes)
+  double measurement = 2;
+
+  // Text override (what's actually displayed)
+  string text_override = 3;
+
+  // Definition points (where dimension is anchored)
+  Point def_point_1 = 4;
+  Point def_point_2 = 5;
+  Point text_midpoint = 6;
+
+  // Rotation angle of dimension text (radians)
+  double rotation = 7;
+
+  // Layer the dimension is on
+  string layer = 8;
+
+  reserved 9 to 20;
+}
+
+// LineEntity represents a line segment
+message LineEntity {
+  Point start = 1;   // Start point (comparable!)
+  Point end = 2;     // End point (comparable!)
+
+  // Computed properties
+  double length = 3;  // Length (comparable, aggregable)
+  double angle = 4;   // Angle from horizontal in radians (comparable)
+
+  // Styling
+  string layer = 5;
+  string linetype = 6;
+  double lineweight = 7;
+
+  reserved 8 to 15;
+}
+
+// ArcEntity represents a circular arc
+message ArcEntity {
+  Point center = 1;        // Center point (comparable!)
+  double radius = 2;       // Radius (comparable, aggregable)
+
+  double start_angle = 3;  // Start angle in radians (comparable)
+  double end_angle = 4;    // End angle in radians (comparable)
+
+  // Computed property
+  double arc_length = 5;   // Arc length (aggregable)
+
+  // Styling
+  string layer = 6;
+  string linetype = 7;
+
+  reserved 8 to 15;
+}
+
+// CircleEntity represents a full circle
+message CircleEntity {
+  Point center = 1;   // Center point (comparable!)
+  double radius = 2;  // Radius (comparable, aggregable)
+
+  string layer = 3;
+  string linetype = 4;
+
+  reserved 5 to 10;
+}
+
+// ============================================================================
+// Block Comparison and User Feedback
+// ============================================================================
+
+// BlockComparison tracks differences between versions of a block
+message BlockComparison {
+  string block_name = 1;
+  repeated string drawing_ids = 2;  // Drawings that contain this block
+
+  // Types of differences found
+  message Difference {
+    enum Type {
+      TYPE_UNSPECIFIED = 0;
+      DIMENSION_VALUE = 1;     // Dimension measurement differs
+      GEOMETRY_POSITION = 2;   // Line/arc position differs
+      ENTITY_COUNT = 3;        // Different number of entities
+      ENTITY_MISSING = 4;      // Entity exists in one but not others
+      ENTITY_ADDED = 5;        // New entity in one version
+    }
+    Type type = 1;
+
+    string description = 2;  // Human-readable description
+    repeated string affected_drawing_ids = 3;
+
+    // For dimension differences
+    optional DimensionDifference dimension_diff = 4;
+
+    // For geometry differences
+    optional GeometryDifference geometry_diff = 5;
+
+    reserved 6 to 15;
+  }
+
+  message DimensionDifference {
+    string entity_handle = 1;
+    map<string, double> measurements_by_drawing = 2;  // drawing_id → measurement
+    double max_deviation = 3;  // Maximum difference found
+  }
+
+  message GeometryDifference {
+    string entity_handle = 1;
+    string entity_type = 2;  // "LINE", "ARC", etc.
+    map<string, Point> positions_by_drawing = 3;  // drawing_id → position
+    double max_distance = 4;  // Maximum position difference
+  }
+
+  repeated Difference differences = 3;
+
+  // User's selection for canonical version
+  string canonical_drawing_id = 4;
+  string selection_reason = 5;  // Why user chose this version
+  int64 selection_timestamp_ms = 6;
+
+  reserved 7 to 15;
+}
+
+// ============================================================================
+// Binder Configuration
+// ============================================================================
+
+// BinderConfig configures PDF binder generation
+message BinderConfig {
+  string title = 1;  // Binder title (e.g., "C-Loop Drawings - Project 18066")
+  string project_number = 2;
+
+  // Ordered list of drawings to include
+  repeated string drawing_paths = 3;
+
+  // Canonical block selections (block_name → drawing_id)
+  map<string, string> canonical_blocks = 4;
+
+  // Options for what to include
+  bool include_cover_page = 5;
+  bool include_index = 6;
+  bool include_block_usage_matrix = 7;
+  bool include_dimension_reference_table = 8;
+  bool include_standardization_report = 9;
+
+  // Output configuration
+  string output_path = 10;
+  bool add_bookmarks = 11;
+
+  reserved 12 to 20;
+}

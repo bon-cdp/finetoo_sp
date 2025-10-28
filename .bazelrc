@@ -1,0 +1,55 @@
+# Finetoo Bazel Configuration
+# Based on Google C++ best practices
+
+# C++20 standard
+build --cxxopt=-std=c++20
+build --host_cxxopt=-std=c++20
+
+# Compiler warnings (Google style)
+build --cxxopt=-Wall
+build --cxxopt=-Wextra
+# Note: -Werror disabled for external dependencies compatibility
+# build --cxxopt=-Werror
+build --cxxopt=-Wno-unused-parameter
+build --cxxopt=-Wno-missing-requires
+
+# Optimization flags
+build:opt --compilation_mode=opt
+build:opt --copt=-O3
+build:opt --copt=-DNDEBUG
+
+# Debug configuration
+build:dbg --compilation_mode=dbg
+build:dbg --copt=-g
+build:dbg --strip=never
+
+# Address sanitizer for memory debugging
+build:asan --copt=-fsanitize=address
+build:asan --linkopt=-fsanitize=address
+build:asan --copt=-g
+build:asan --strip=never
+
+# Thread sanitizer
+build:tsan --copt=-fsanitize=thread
+build:tsan --linkopt=-fsanitize=thread
+build:tsan --copt=-g
+
+# Use Bzlmod for dependency management
+common --enable_bzlmod
+
+# Build event protocol for better logging
+build --build_event_text_file=build_events.txt
+
+# Test configuration
+test --test_output=errors
+test --test_summary=detailed
+
+# Coverage
+coverage --combined_report=lcov
+coverage --instrumentation_filter="//src[/:]"
+
+# Remote cache (optional - configure for your setup)
+# build --remote_cache=grpc://localhost:9092
+
+# Per-user customization (add user.bazelrc to .gitignore)
+try-import %workspace%/user.bazelrc

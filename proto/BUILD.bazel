@@ -1,0 +1,46 @@
+# Protocol Buffer definitions for Finetoo
+
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Graph schema protocol buffers
+proto_library(
+    name = "graph_proto",
+    srcs = ["graph.proto"],
+)
+
+cc_proto_library(
+    name = "graph_cc_proto",
+    deps = [":graph_proto"],
+)
+
+# Operations protocol buffers
+proto_library(
+    name = "operations_proto",
+    srcs = ["operations.proto"],
+    deps = [":graph_proto"],
+)
+
+cc_proto_library(
+    name = "operations_cc_proto",
+    deps = [":operations_proto"],
+)
+
+# Service definitions (will add gRPC later)
+# proto_library(
+#     name = "service_proto",
+#     srcs = ["service.proto"],
+#     deps = [
+#         ":graph_proto",
+#         ":operations_proto",
+#     ],
+# )
+
+# cc_grpc_library(
+#     name = "service_cc_grpc",
+#     srcs = [":service_proto"],
+#     grpc_only = True,
+#     deps = [":service_cc_proto"],
+# )

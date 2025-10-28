@@ -1,0 +1,30 @@
+# CAD Analysis Tools
+
+cc_library(
+    name = "block_analyzer",
+    srcs = ["block_analyzer.cc"],
+    hdrs = ["block_analyzer.h"],
+    deps = [
+        "//proto:graph_cc_proto",
+        "//src/graph:graph_builder",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+        # TODO: Add crypto library for SHA-256
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# TODO: Implement block standardizer
+# cc_library(
+#     name = "block_standardizer",
+#     srcs = ["block_standardizer.cc"],
+#     hdrs = ["block_standardizer.h"],
+#     deps = [
+#         ":block_analyzer",
+#         "//proto:graph_cc_proto",
+#         "@com_google_absl//absl/container:flat_hash_map",
+#         "@com_google_absl//absl/status",
+#     ],
+#     visibility = ["//visibility:public"],
+# )

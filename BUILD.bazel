@@ -1,0 +1,10 @@
+# Root BUILD file for Finetoo
+
+# Default visibility for package
+package(default_visibility = ["//visibility:public"])
+
+# Export license and documentation files
+exports_files([
+    "README.md",
+    "LICENSE",
+])

@@ -1,0 +1,30 @@
+# Bazel outputs
+/bazel-*
+build_events.txt
+
+# User-specific Bazel config
+user.bazelrc
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Compiled outputs
+*.o
+*.a
+*.so
+*.dylib
+
+# Test outputs
+test_output/
+coverage/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

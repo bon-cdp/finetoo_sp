@@ -1,0 +1,25 @@
+# DXF Parser
+
+cc_library(
+    name = "dxf_text_parser",
+    srcs = ["dxf_text_parser.cc"],
+    hdrs = ["dxf_text_parser.h"],
+    deps = [
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# TODO: Add tests
+# cc_test(
+#     name = "dxf_text_parser_test",
+#     srcs = ["dxf_text_parser_test.cc"],
+#     deps = [
+#         ":dxf_text_parser",
+#         "@com_google_googletest//:gtest_main",
+#     ],
+# )

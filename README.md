@@ -1,6 +1,6 @@
 # Finetoo Structuring Protocol (finetoo_sp)
 
-> **Beyond Fine-Tuning**: Schema-Driven Tool Discovery for Structured Document Understanding
+> **Beyond Fine-Tuning**: Schema-Driven Tool Discovery for Structured Document Understanding - draft in progress at https://docs.google.com/document/d/15P4b0tUrXnWHMnnZTht2m1aXPjktOb4J83BGHysybPo/edit?usp=sharing
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]() [![License](https://img.shields.io/badge/license-MIT-blue)]() [![C++20](https://img.shields.io/badge/C%2B%2B-20-blue)]()
 
@@ -462,3 +462,4 @@ MIT License - see LICENSE file for details
 **Status**: Foundation Complete ✅
 **Next Milestone**: Block Divergence Analysis on C-Loop Drawings
 **Timeline**: 2-3 weeks for full C-loop standardization workflow
+

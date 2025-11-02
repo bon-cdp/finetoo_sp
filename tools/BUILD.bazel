@@ -16,3 +16,40 @@ cc_binary(
         "//src/parser:dxf_text_parser",
     ],
 )
+
+cc_binary(
+    name = "demo_bom_operations",
+    srcs = ["demo_bom_operations.cc"],
+    deps = [
+        "//src/graph:graph_builder",
+        "//src/operations:operation_executor",
+        "//src/parser:dxf_text_parser",
+        "//proto:graph_cc_proto",
+        "//proto:operations_cc_proto",
+    ],
+)
+
+cc_binary(
+    name = "demo_llm_bom",
+    srcs = ["demo_llm_bom.cc"],
+    deps = [
+        "//src/cloud:vertex_ai_client",
+        "//src/graph:graph_builder",
+        "//src/query:query_service",
+        "//proto:graph_cc_proto",
+        "//proto:operations_cc_proto",
+    ],
+)
+
+cc_binary(
+    name = "generate_full_bom",
+    srcs = ["generate_full_bom.cc"],
+    deps = [
+        "//src/cloud:vertex_ai_client",
+        "//src/export:bom_exporter",
+        "//src/graph:graph_builder",
+        "//src/query:query_service",
+        "//proto:graph_cc_proto",
+        "//proto:operations_cc_proto",
+    ],
+)

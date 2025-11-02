@@ -1,0 +1,16 @@
+# Google Cloud Integration
+# Vertex AI client for Gemini API
+
+cc_library(
+    name = "vertex_ai_client",
+    srcs = ["vertex_ai_client.cc"],
+    hdrs = ["vertex_ai_client.h"],
+    deps = [
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@nlohmann_json//:json",
+    ],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,19 @@
+# Query Service
+# Natural language query processing with LLM operation composition
+
+cc_library(
+    name = "query_service",
+    srcs = ["query_service.cc"],
+    hdrs = ["query_service.h"],
+    deps = [
+        "//proto:graph_cc_proto",
+        "//proto:operations_cc_proto",
+        "//src/cloud:vertex_ai_client",
+        "//src/operations:operation_executor",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+        "@nlohmann_json//:json",
+    ],
+    visibility = ["//visibility:public"],
+)

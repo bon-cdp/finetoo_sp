@@ -1,20 +1,20 @@
 # Export Format Generators
 # BOM reports, DXF writers, inspection checklists
 
-# TODO: Implement BOM generator
-# cc_library(
-#     name = "bom_generator",
-#     srcs = ["bom_generator.cc"],
-#     hdrs = ["bom_generator.h"],
-#     deps = [
-#         "//proto:graph_cc_proto",
-#         "//src/semantic:part_identifier",
-#         "@com_google_absl//absl/status",
-#         "@com_google_absl//absl/status:statusor",
-#         "@nlohmann_json//:json",
-#     ],
-#     visibility = ["//visibility:public"],
-# )
+cc_library(
+    name = "bom_exporter",
+    srcs = ["bom_exporter.cc"],
+    hdrs = ["bom_exporter.h"],
+    deps = [
+        "//proto:graph_cc_proto",
+        "//proto:operations_cc_proto",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+        "@nlohmann_json//:json",
+    ],
+    visibility = ["//visibility:public"],
+)
 
 # TODO: Implement DXF writer
 # cc_library(

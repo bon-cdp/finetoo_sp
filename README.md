@@ -1,5 +1,6 @@
 # Finetoo Structuring Protocol (finetoo_sp)
-<img width="1919" height="1070" alt="image" src="https://github.com/user-attachments/assets/386b8ee7-dde1-474d-a159-4d641d73055c" />
+<img width="1919" height="1070" alt="image" src="https://github.com/user-attachments/assets/cb5a62ba-cab9-4692-a60f-c9290afba750" />
+
 
 > **Beyond Fine-Tuning**: Schema-Driven Tool Discovery for Structured Document Understanding - draft in progress at https://docs.google.com/document/d/15P4b0tUrXnWHMnnZTht2m1aXPjktOb4J83BGHysybPo/edit?usp=sharing
 
@@ -716,6 +717,7 @@ MIT License - see LICENSE file for details
 **Current Focus**: Interactive CLI + BOM Generation User Journey
 **Next Milestone**: Working BOM generator with divergence detection
 **Timeline**: 2 weeks for BOM, 2 weeks for Inspection Checklists, 2 weeks for LLM integration
+
 
 
 

@@ -28,3 +28,13 @@ coverage/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Python virtual environment
+/venv/
+
+# Node.js dependencies and build output for the CLI
+/finetoo_cli/node_modules/
+/finetoo_cli/dist/
+
+# CMake build directory for the arb project
+/arb/build/

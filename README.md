@@ -10,6 +10,21 @@ Finetoo is a production-grade C++ implementation demonstrating how **graph schem
 
 **Key Insight**: Structured documents (CAD drawings, Excel spreadsheets, Word documents) already encode their own operations through schema metadata. We make this explicit and let LLMs compose operations zero-shot.
 
+## Current Status: Finetoo CLI
+
+We have successfully integrated a new conversational CLI, `finetoo_cli`, built upon a fork of the `gemini-cli` project. This CLI acts as an intelligent orchestrator, allowing natural language interaction to leverage Finetoo's powerful C++ backend.
+
+**Key Features Implemented:**
+- **Conversational Interface:** An interactive command-line experience, similar to Claude Code or Gemini CLI.
+- **Custom Branding:** The CLI now features custom "Finetoo" ASCII art on startup.
+- **C++ Tool Integration:** The CLI can successfully execute existing C++ tools, such as `parse_dxf`, demonstrating seamless interoperability between the TypeScript frontend and the high-performance C++ backend.
+- **Dummy Financial Tools:** Placeholder tools for financial analysis have been scaffolded, ready for integration with live APIs:
+    - `/get_news`: Fetches dummy news headlines.
+    - `/get_options_chain <SYMBOL>`: Retrieves a dummy options chain for a given stock symbol.
+    - `/calculate_black_scholes ...`: Performs a dummy Black-Scholes option price calculation.
+
+This establishes a robust foundation for expanding Finetoo into both a comprehensive engineering analysis platform and a powerful financial engineering tool.
+
 ### The Problem
 
 - **Fine-tuning LLMs** for enterprise documents costs $100k+ and is brittle

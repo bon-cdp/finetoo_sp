@@ -21,9 +21,6 @@ We have successfully integrated a new conversational CLI, `finetoo_cli`, built u
 - **Custom Branding:** The CLI now features custom "Finetoo" ASCII art on startup.
 - **C++ Tool Integration:** The CLI can successfully execute existing C++ tools, such as `parse_dxf`, demonstrating seamless interoperability between the TypeScript frontend and the high-performance C++ backend.
 
-    - `/get_news`: Fetches dummy news headlines.
-    - `/get_options_chain <SYMBOL>`: Retrieves a dummy options chain for a given stock symbol.
-    - `/calculate_black_scholes ...`: Performs a dummy Black-Scholes option price calculation.
 
 This establishes a robust foundation for expanding Finetoo into both a comprehensive engineering analysis platform.
 
@@ -717,6 +714,7 @@ MIT License - see LICENSE file for details
 **Current Focus**: Interactive CLI + BOM Generation User Journey
 **Next Milestone**: Working BOM generator with divergence detection
 **Timeline**: 2 weeks for BOM, 2 weeks for Inspection Checklists, 2 weeks for LLM integration
+
 
 
 

@@ -1,0 +1,17 @@
+# Example: Perfectly Consistent Statements
+# This should score 100% consistency
+
+mammal is animal
+bird is animal
+fish is animal
+dog is mammal
+cat is mammal
+sparrow is bird
+salmon is fish
+dog has fur
+cat has fur
+sparrow has feathers
+salmon has scales
+mammal is not bird
+bird is not fish
+fish is not mammal

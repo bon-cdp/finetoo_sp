@@ -1,0 +1,21 @@
+# Example: Complex Knowledge Structure
+# Tests transitivity and complex relationships
+
+consciousness is phenomenon
+awareness is phenomenon
+thought is process
+memory is storage
+emotion is experience
+consciousness has awareness
+consciousness has thought
+consciousness has emotion
+thought has memory
+awareness is not memory
+process is not storage
+phenomenon has emergence
+emergence is property
+property is characteristic
+characteristic is not entity
+entity is object
+object has properties
+consciousness is entity

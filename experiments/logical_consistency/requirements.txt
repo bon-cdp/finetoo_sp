@@ -1,0 +1,5 @@
+# Requirements for Logical Consistency Scorer
+# Minimal dependencies - just numpy and scipy for the linear algebra
+
+numpy>=1.21.0
+scipy>=1.7.0

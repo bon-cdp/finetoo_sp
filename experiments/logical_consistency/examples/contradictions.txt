@@ -1,0 +1,13 @@
+# Example: Direct Contradictions
+# This should score around 50% or lower
+
+dog is animal
+cat is animal
+bird is animal
+dog has fur
+cat has fur
+bird has feathers
+dog is cat
+dog is not cat
+bird has wings
+bird lacks wings

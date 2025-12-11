@@ -1,0 +1,22 @@
+# Example: Digital Brain Thoughts
+# Simulates the kind of unstructured thoughts your Wharton friend might have
+
+technology is progress
+progress is good
+technology is harmful
+harmful is bad
+good is not bad
+AI is technology
+AI is tool
+tool is useful
+useful is good
+AI is threat
+threat is dangerous
+dangerous is bad
+learning is growth
+growth is positive
+positive is good
+failure is learning
+failure is negative
+negative is bad
+positive is not negative
